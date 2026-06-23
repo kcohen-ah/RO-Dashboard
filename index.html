@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RO Assignment Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F3EF;--surface:#FFFFFF;--surface2:#F0EFE9;
+  --border:#E3E1D8;--border2:#C8C6BC;
+  --text:#1C1B18;--text2:#6A6960;--text3:#9E9D95;
+  --navy:#1B3F6E;--navy-dk:#122C4E;--navy-lt:#E8EEF6;
+  --green:#1A5C38;--green-lt:#E4F2EC;
+  --amber:#7A490C;--amber-lt:#FBF0DF;
+  --red:#8C2020;--red-lt:#FBEAEA;
+  --purple:#3D2580;--purple-lt:#EDEAFA;
+  --teal:#0D5C50;--teal-lt:#E2F2EF;
+  --r:8px;--rlg:13px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shmd:0 4px 14px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--navy);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.hdr-title h1{font-size:18px;font-weight:600;color:#fff;letter-spacing:-.02em}
+.hdr-title p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.hdr-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vtoggle{display:flex;background:rgba(255,255,255,.12);border-radius:6px;padding:3px;gap:2px}
+.vtoggle button{padding:5px 12px;border:none;border-radius:4px;background:transparent;color:rgba(255,255,255,.65);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.vtoggle button.on{background:#fff;color:var(--navy)}
+.hsep{width:1px;height:20px;background:rgba(255,255,255,.18)}
+.cinput{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:6px 10px 6px 28px;color:#fff;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:background .15s;width:145px}
+.cinput::placeholder{color:rgba(255,255,255,.4)}
+.cinput:focus{background:rgba(255,255,255,.2)}
+.cwrap{position:relative}
+.cwrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.4);pointer-events:none}
+.csel{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:6px 26px 6px 10px;color:#fff;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.csel option{background:var(--navy);color:#fff}
+.btn-add{background:#fff;color:var(--navy);border:none;border-radius:6px;padding:6px 13px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s,transform .1s;white-space:nowrap}
+.btn-add:hover{background:#dce9f7;transform:translateY(-1px)}
+
+/* METRICS */
+.metrics{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.metric{flex:1;min-width:100px;background:var(--surface);padding:13px 18px;display:flex;align-items:baseline;gap:10px}
+.metric .n{font-size:24px;font-weight:600;letter-spacing:-.03em;font-family:'DM Mono',monospace;color:var(--text)}
+.metric .l{font-size:11px;color:var(--text2);line-height:1.3}
+.metric.c-grn .n{color:var(--green)}
+.metric.c-amb .n{color:var(--amber)}
+.metric.c-red .n{color:var(--red)}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;padding:9px 28px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.leg-lbl{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.leg-sep{width:1px;height:13px;background:var(--border);margin:0 2px}
+.leg-note{font-size:11px;color:var(--text3);font-style:italic}
+
+/* MAIN */
+.main{padding:20px 28px}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;margin-top:24px}
+.sec-lbl:first-child{margin-top:0}
+
+/* RO GRID */
+.ro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:13px}
+
+/* RO COLOR PALETTE — one distinct soft hue per RO */
+:root{
+  --ro-bob-h:   #EAF4FB; --ro-bob-b:   #A8D4EE; --ro-bob-t:   #1A5276;
+  --ro-eric-h:  #EAF7F0; --ro-eric-b:  #82CFA4; --ro-eric-t:  #1A6638;
+  --ro-gene-h:  #F4EBF9; --ro-gene-b:  #C39BDC; --ro-gene-t:  #6C2A8A;
+  --ro-jodi-h:  #FEF5E7; --ro-jodi-b:  #F7C987; --ro-jodi-t:  #8A5A0A;
+  --ro-kristy-h:#FEF0F0; --ro-kristy-b:#F1A8A8; --ro-kristy-t:#8C2222;
+  --ro-mary-h:  #F0F3FE; --ro-mary-b:  #A4B8F5; --ro-mary-t:  #1E3799;
+  --ro-mike-h:  #F0FAF8; --ro-mike-b:  #7ECDC1; --ro-mike-t:  #0E6B5E;
+  --ro-mon-h:   #FDF0F7; --ro-mon-b:   #E8A6D2; --ro-mon-t:   #7B1F5E;
+  --ro-tc-h:    #F5F0EC; --ro-tc-b:    #C4A882; --ro-tc-t:    #5C3D1A;
+  --ro-tim-h:   #EDFCF2; --ro-tim-b:   #6FCBA0; --ro-tim-t:   #145A38;
+  --ro-ben-h:   #FDF5EC; --ro-ben-b:   #F0B87A; --ro-ben-t:   #7A3F0A;
+  --ro-new-h:   #F1F1F1; --ro-new-b:   #AAAAAA; --ro-new-t:   #444444;
+}
+
+/* RO CARD */
+.ro-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,border-color .15s;border-left-width:4px}
+.ro-card:hover{box-shadow:var(--shmd)}
+.ro-card.drag-over{outline:2px dashed var(--navy);outline-offset:-2px;background:var(--navy-lt);box-shadow:none}
+.ro-head{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ro-name{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.ro-sub{font-size:11px;margin-top:1px;opacity:.65}
+.ro-badges{display:flex;gap:5px;flex-shrink:0}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace}
+.badge.curr{background:rgba(0,0,0,.1);color:inherit}
+.badge.prop{background:var(--green-lt);color:var(--green)}
+.ro-body{padding:9px 10px;display:flex;flex-direction:column;gap:5px;flex:1;min-height:44px}
+
+/* Per-RO coloring applied inline via style attr on .ro-card and .ro-head */
+
+/* CLIENT ROW */
+.crow{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);cursor:grab;transition:border-color .12s,background .12s,box-shadow .12s,opacity .2s;user-select:none;position:relative}
+.crow:hover{border-color:var(--border2);background:var(--surface2)}
+.crow.dragging{opacity:.3;cursor:grabbing}
+.cname{font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'DM Mono',monospace;letter-spacing:-.01em}
+.cmeta{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.tpill{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.tpill.sig{background:var(--purple-lt);color:var(--purple)}
+.tpill.ess{background:var(--teal-lt);color:var(--teal)}
+.tpill.eng{background:var(--amber-lt);color:var(--amber)}
+.spill{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.03em;text-transform:uppercase}
+.spill.leaving{background:var(--red-lt);color:var(--red)}
+.spill.at-risk{background:var(--amber-lt);color:var(--amber)}
+.spill.new-ro{background:var(--green-lt);color:var(--green)}
+.spill.tbd{background:var(--amber-lt);color:var(--amber)}
+.spill.new-hire{background:var(--purple-lt);color:var(--purple)}
+.ctag{font-size:10px;color:var(--text3);white-space:nowrap;display:flex;align-items:center;gap:2px}
+.ctag b{color:var(--navy);font-weight:600}
+.ndot{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0;cursor:help}
+.bedit{background:none;border:none;padding:2px 3px;cursor:pointer;color:var(--text3);border-radius:4px;transition:color .12s,background .12s;display:flex;align-items:center;line-height:1}
+.bedit:hover{color:var(--navy);background:var(--navy-lt)}
+.ro-add{margin-top:2px;padding:5px 10px;border:1.5px dashed var(--border2);border-radius:7px;background:none;color:var(--text3);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;text-align:center;transition:all .12s}
+.ro-add:hover{border-color:var(--navy);color:var(--navy);background:var(--navy-lt)}
+.empty-msg{font-size:11px;color:var(--text3);text-align:center;padding:12px 0;font-style:italic}
+
+/* DEPT */
+.dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
+.dept-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.dept-head{background:var(--surface2);padding:9px 13px;font-size:12px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.dept-head .dn{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);font-weight:400}
+.dept-body{padding:8px 9px;display:flex;flex-direction:column;gap:4px}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.45);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.moverlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border);box-shadow:var(--shmd);width:100%;max-width:470px;max-height:92vh;overflow-y:auto;animation:su .18s ease}
+@keyframes su{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhead{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mhead h3{font-size:15px;font-weight:600;color:var(--text)}
+.mbclose{background:var(--surface2);border:1px solid var(--border);border-radius:6px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:background .12s}
+.mbclose:hover{background:var(--border)}
+.mbody{padding:18px 20px;display:flex;flex-direction:column;gap:13px}
+.mfield label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.mfield input,.mfield select,.mfield textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .12s;appearance:none;-webkit-appearance:none}
+.mfield input:focus,.mfield select:focus,.mfield textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy-lt)}
+.mfield select{background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236A6960' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.mfield textarea{resize:vertical;min-height:72px;line-height:1.5}
+.mfield-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status-preview{margin-top:6px;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:500;display:none}
+.status-preview.show{display:block}
+.mfoot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.mbtn{padding:8px 16px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text2);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .12s;font-weight:500}
+.mbtn:hover{background:var(--surface2)}
+.mbtn.primary{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+.mbtn.primary:hover{background:var(--navy-dk)}
+.mbtn.danger{background:var(--red-lt);color:var(--red);border-color:#f0c0c0;margin-right:auto}
+.mbtn.danger:hover{background:#f7d5d5}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:60px 0;color:var(--text3)}
+.no-results .ico{font-size:28px;margin-bottom:10px}
+.no-results p{font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-title">
+    <h1>RO Assignment Dashboard</h1>
+    <p id="datestamp">Client Services · Association Management</p>
+  </div>
+  <div class="hdr-right">
+    <div class="vtoggle" id="vtoggle">
+      <button class="on" onclick="setView('current',this)">Current</button>
+      <button onclick="setView('proposed',this)">Proposed</button>
+      <button onclick="setView('both',this)">Compare</button>
+    </div>
+    <div class="hsep"></div>
+    <div class="cwrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="cinput" id="qClient" placeholder="Search clients…" oninput="render()">
+    </div>
+    <select class="csel" id="qRO" onchange="render()" title="Filter by RO">
+      <option value="">All ROs</option>
+    </select>
+    <select class="csel" id="qTier" onchange="render()" title="Filter by tier">
+      <option value="">All tiers</option>
+      <option value="Signature">Signature</option>
+      <option value="Essentials">Essentials</option>
+      <option value="Engagement /Project">Engagement / Project</option>
+    </select>
+    <button class="btn-add" onclick="openAdd('')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add Client
+    </button>
+    <button class="btn-add" onclick="openAddRO()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.3)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add RO
+    </button>
+  </div>
+</header>
+
+<div class="metrics" id="metrics"></div>
+
+<div class="legend">
+  <span class="leg-lbl">ROs</span>
+  <span id="ro-legend-items" style="display:contents"></span>
+  <span class="leg-sep"></span>
+  <span class="leg-lbl">Tier</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--purple)"></span>Signature</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--teal)"></span>Essentials</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span>Engagement&nbsp;/&nbsp;Project</span>
+  <span class="leg-sep"></span>
+  <span class="leg-lbl">Status</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--red);border-radius:8px"></span>Leaving</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--amber);border-radius:8px"></span>At risk / TBD</span>
+  <span class="leg-item"><span class="leg-dot" style="background:var(--green);border-radius:8px"></span>New RO needed</span>
+  <span class="leg-sep"></span>
+  <span class="leg-note">● hover dot for notes &nbsp;·&nbsp; drag &amp; drop clients between RO cards</span>
+</div>
+
+<main class="main" id="main"></main>
+
+<div class="moverlay" id="moverlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="mhead">
+      <h3 id="mtitle">Add Client</h3>
+      <button class="mbclose" onclick="closeModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="mbody" id="mbody"></div>
+    <div class="mfoot" id="mfoot"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA (source: "By Person" tab, tiers/notes from "Client Portfolio Placement" tab) ──
+// ─── CLIENT DATA ─────────────────────────────────────────────────────────────
+// Source of truth: Tab 1 "Client Portfolio Placement" — 80 active assigned clients.
+// MMBC excluded (noted "no longer a client"). Tim & Carol have no current clients
+// (proposed only); their proposed assignments are stored in the prop field of the
+// clients being moved to them. COPA/ISDA/OPA/PGCC/ANG/WRA excluded (no RO, status unclear).
+// Each entry: {client, tier, curr, prop, notes, status}
+// status: '' = active | 'at-risk' | 'leaving'
+let clients = [
+  // ── BOB (2) ──────────────────────────────────────────────────────────────
+  // Tab 2: proposed list keeps GR and RIC with Bob; also Tim gets GR and RIC proposed
+  {client:'GR',      tier:'Essentials',            curr:'Bob',                    prop:'Tim',      notes:'Determine timing — KC to monitor with Bob. Proposed to Tim (new hire).', status:''},
+  {client:'RIC',     tier:'Essentials',            curr:'Bob',                    prop:'Tim',      notes:'Determine timing — KC to monitor with Bob. Proposed to Tim (new hire).', status:''},
+
+  // ── ERIC (13) ────────────────────────────────────────────────────────────
+  // Tab 2 proposed for Eric: NOVA and HCA stay with Eric; others move to Tim
+  {client:'AJMA',    tier:'Engagement /Project',   curr:'Eric',                   prop:'Tim',      notes:'Member services only. Proposed to move to Tim.', status:''},
+  {client:'AET',     tier:'Essentials',            curr:'Eric',                   prop:'Carol',    notes:'RO was moving to Eric in March. Proposed to move to Carol.', status:''},
+  {client:'CASMI',   tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'CGA',     tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'DISCA',   tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'HCA',     tier:'Essentials',            curr:'Eric',                   prop:'Eric',     notes:'Staying with Eric (proposed list: HCA).', status:''},
+  {client:'HVVC',    tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'NORDP',   tier:'Signature',             curr:'Eric',                   prop:'Gene',     notes:'Move to Gene? Signature client — confirm with team.', status:''},
+  {client:'NOVA',    tier:'Essentials',            curr:'Eric',                   prop:'Eric',     notes:'Staying with Eric (proposed list: NOVA).', status:''},
+  {client:'SAVT',    tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'SIM',     tier:'Essentials',            curr:'Eric',                   prop:'Tim',      notes:'Proposed to move to Tim.', status:''},
+  {client:'WIAWWA',  tier:'Essentials',            curr:'Eric',                   prop:'Eric',     notes:'Keep until we know about Partners — Carol or Tim.', status:''},
+  {client:'WWOA',    tier:'Essentials',            curr:'Eric',                   prop:'',         notes:'Giving client notice — departing.', status:'leaving'},
+
+  // ── GENE (12) ────────────────────────────────────────────────────────────
+  {client:'AALHE',             tier:'Essentials',  curr:'Gene',                   prop:'Carol',    notes:'Move to Carol (new hire).', status:''},
+  {client:'ACG - Toronto Chapter',tier:'Essentials',curr:'Gene',                 prop:'Tim',      notes:'Proposed to move to Tim (new hire).', status:''},
+  {client:'APTA-PPS',          tier:'Signature',   curr:'Gene',                   prop:'Gene',     notes:'', status:''},
+  {client:'ARIN',              tier:'Essentials',  curr:'Gene',                   prop:'Tim',      notes:'Proposed to move to Tim (new hire).', status:''},
+  {client:'CRS',               tier:'Signature',   curr:'Gene',                   prop:'Gene',     notes:'', status:''},
+  {client:'CSOHNS',            tier:'Essentials',  curr:'Gene',                   prop:'Tim',      notes:'New relationship — Gene tied in with industry. Proposed to Tim.', status:''},
+  {client:'EXIS',              tier:'Essentials',  curr:'Gene',                   prop:'Tim',      notes:'Proposed to move to Tim (new hire).', status:''},
+  {client:'HSPC',              tier:'Essentials',  curr:'Gene',                   prop:'Tim',      notes:'Proposed to move to Tim (new hire).', status:''},
+  {client:'I4PL',              tier:'Essentials',  curr:'Gene',                   prop:'Gene',     notes:'Client at risk — giving notice for non-payment. Potentially out by June.', status:'at-risk'},
+  {client:'OARSI',             tier:'Signature',   curr:'Gene',                   prop:'Gene',     notes:'', status:''},
+  {client:'SIOR - CCC',        tier:'Essentials',  curr:'Gene',                   prop:'Tim',      notes:'Proposed to move to Tim (new hire).', status:''},
+  {client:'WETT',              tier:'Essentials',  curr:'Gene',                   prop:'',         notes:'Client leaving AH by July.', status:'leaving'},
+
+  // ── JODI (1) ─────────────────────────────────────────────────────────────
+  {client:'NADCA',   tier:'Signature',             curr:'Jodi',                   prop:'Jodi',     notes:'No change.', status:''},
+
+  // ── KRISTY (7) ───────────────────────────────────────────────────────────
+  // Tab 2 proposed list: CABL, CAFII, CRLA (in), IAAE, IPS, VRA. SIOR-CEC moves out to Tim.
+  {client:'ASECS',                     tier:'Engagement /Project', curr:'Kristy', prop:'Kristy',  notes:'Interim ED services Jan–March. Martine assigned. Essentials client if they come to full service.', status:''},
+  {client:'Avenue Black and Indigenous',tier:'Engagement /Project',curr:'Kristy', prop:'Kristy',  notes:"CABL's scholarship program.", status:''},
+  {client:'CABL',    tier:'Essentials',            curr:'Kristy',                 prop:'Kristy',   notes:'Keep for now.', status:''},
+  {client:'CAFII',   tier:'Essentials',            curr:'Kristy',                 prop:'Kristy',   notes:'Keep for now.', status:''},
+  {client:'IAAE',    tier:'Essentials',            curr:'Kristy',                 prop:'Kristy',   notes:'Change after contract renewal in May.', status:''},
+  {client:'IPS',     tier:'Essentials',            curr:'Kristy',                 prop:'Kristy',   notes:'Administration only.', status:''},
+  {client:'VRA',     tier:'Essentials',            curr:'Kristy',                 prop:'Kristy',   notes:'Association will phase out as members retire — anticipated over next 5 years.', status:''},
+  {client:'SIOR - CEC',tier:'Essentials',          curr:'Kristy',                 prop:'Tim',      notes:'Moving out to Tim (new hire).', status:''},
+
+  // ── MARYBETH (6) ─────────────────────────────────────────────────────────
+  {client:'ABSNC',   tier:'Signature',             curr:'MaryBeth',               prop:'MaryBeth', notes:'', status:''},
+  {client:'ABTC',    tier:'Signature',             curr:'MaryBeth',               prop:'MaryBeth', notes:'', status:''},
+  {client:'CSME',    tier:'Essentials',            curr:'MaryBeth',               prop:'MaryBeth', notes:'Consider whether to keep with MB or move to new CRO to keep MM together.', status:''},
+  {client:'MDCB',    tier:'Signature',             curr:'MaryBeth',               prop:'MaryBeth', notes:'', status:''},
+  {client:'NBCSN',   tier:'Signature',             curr:'MaryBeth',               prop:'MaryBeth', notes:'', status:''},
+  {client:'TNFTAP',  tier:'Signature',             curr:'MaryBeth',               prop:'MaryBeth', notes:'', status:''},
+
+  // ── MIKE (6) ─────────────────────────────────────────────────────────────
+  {client:'ASHT',    tier:'Signature',             curr:'Mike',                   prop:'Monica',   notes:'RO moving to Monica by end of June (pending contract signature).', status:''},
+  {client:'BSA/JPMA',tier:'Signature',             curr:'Mike',                   prop:'Monica',   notes:'Plan to move to Monica by end of year — MEL to monitor with Mike.', status:''},
+  {client:'CCMC',    tier:'Signature',             curr:'Mike',                   prop:'TBD',      notes:'Determine timing and person — MEL to monitor with Mike.', status:''},
+  {client:'CLDA',    tier:'Signature',             curr:'Mike',                   prop:'Gene',     notes:'Move to Gene end of June.', status:''},
+  {client:'TDP',     tier:'Signature',             curr:'Mike',                   prop:'TBD',      notes:'Will plan to move by end of year.', status:''},
+  {client:'WOCN',    tier:'Signature',             curr:'Mike',                   prop:'Gene',     notes:'Move to Gene by end of year.', status:''},
+
+  // ── MONICA (10) ──────────────────────────────────────────────────────────
+  {client:'AAHFN',   tier:'Signature',             curr:'Monica',                 prop:'Monica',   notes:'Integrated — Hybrid/External ED.', status:''},
+  {client:'AHTF',    tier:'Essentials',            curr:'Monica',                 prop:'Gene',     notes:'Move to Gene by Q3.', status:''},
+  {client:'BAFT',    tier:'Engagement /Project',   curr:'Monica',                 prop:'',         notes:'End of contract August — member services only.', status:'leaving'},
+  {client:'CRLA',    tier:'Essentials',            curr:'Monica',                 prop:'Kristy',   notes:'Move to Kristy by end of year.', status:''},
+  {client:'CSHEMA',  tier:'Signature',             curr:'Monica',                 prop:'Monica',   notes:'', status:''},
+  {client:'ICPHSO',  tier:'Signature',             curr:'Monica',                 prop:'Monica',   notes:'', status:''},
+  {client:'MGMA',    tier:'Signature',             curr:'Monica',                 prop:'New',      notes:'Move to new Signature hire.', status:''},
+  {client:'NYSPA',   tier:'Signature',             curr:'Monica',                 prop:'New',      notes:'Move to new RO — possibly essentials tier.', status:''},
+  {client:'RIA',     tier:'Signature',             curr:'Monica',                 prop:'Monica',   notes:'', status:''},
+  {client:'SFB',     tier:'Signature',             curr:'Monica',                 prop:'Monica',   notes:'', status:''},
+
+  // ── TC (1) ───────────────────────────────────────────────────────────────
+  {client:'KOTF',    tier:'Essentials',            curr:'TC',                     prop:'TC',       notes:'', status:''},
+
+  // ── DEPARTMENT / SHARED SERVICE (16) ─────────────────────────────────────
+  {client:'ORAC',        tier:'Engagement /Project', curr:'Finance',              prop:'Finance',              notes:'', status:''},
+  {client:'AMAF',        tier:'Engagement /Project', curr:'Finance Dept',         prop:'Finance Dept',         notes:'', status:''},
+  {client:'BLDF',        tier:'Engagement /Project', curr:'Finance Dept',         prop:'Finance Dept',         notes:'', status:''},
+  {client:'HFPF',        tier:'Engagement /Project', curr:'Finance Dept',         prop:'Finance Dept',         notes:'', status:''},
+  {client:'SSWR',        tier:'Engagement /Project', curr:'Finance Dept',         prop:'Finance Dept',         notes:'Gene was RO until full service was not initiated.', status:''},
+  {client:'NAPPS',       tier:'Engagement /Project', curr:'Finance, Tech, Mar/Com',prop:'Finance, Tech, Mar/Com',notes:'Mike CRO who will take over.', status:''},
+  {client:'SSP',         tier:'Engagement /Project', curr:'Finance, Tech, Mar/Com',prop:'Finance, Tech, Mar/Com',notes:'Mike CRO who will take over.', status:''},
+  {client:'PALCI',       tier:'Engagement /Project', curr:'HR & Finance',         prop:'HR & Finance',         notes:'Confidentiality of HR issues prevents Julie from fully supporting.', status:''},
+  {client:'AFE',         tier:'Engagement /Project', curr:'HR Dept',              prop:'HR Dept',              notes:'', status:''},
+  {client:'NJAAP',       tier:'Engagement /Project', curr:'HR Dept',              prop:'HR Dept',              notes:'', status:''},
+  {client:'NCC',         tier:'Engagement /Project', curr:'IR Dept',              prop:'IR Dept',              notes:'', status:''},
+  {client:'CACUBO',      tier:'Engagement /Project', curr:'Mar/Com Dept',         prop:'Mar/Com Dept',         notes:'', status:''},
+  {client:'Glass Ratner',tier:'Engagement /Project', curr:'Meetings Dept',        prop:'Meetings Dept',        notes:'', status:''},
+  {client:'HPCO',        tier:'Engagement /Project', curr:'Meetings Dept',        prop:'Meetings Dept',        notes:'', status:''},
+  {client:'KPMG',        tier:'Engagement /Project', curr:'Meetings Dept',        prop:'Meetings Dept',        notes:'', status:''},
+  {client:'CSCP',        tier:'Engagement /Project', curr:'Tech Dept',            prop:'Tech Dept',            notes:'', status:''},
+];
+// Total: 80 active assigned clients (source: Tab 1). MMBC excluded (no longer a client).
+// Tim & Carol are proposed destinations only — no current clients to display under them.
+
+// Tim & Carol are incoming hires — no current clients, but have proposed client lists
+let MAIN_ROS = ['Bob','Eric','Gene','Jodi','Kristy','MaryBeth','Mike','Monica','TC','Tim','Carol'];
+
+// Per-RO color theme: [headerBg, leftBorderColor, textColor]
+let RO_COLORS = {
+  'Bob':     ['#EAF4FB','#A8D4EE','#1A5276'],
+  'Eric':    ['#EAF7F0','#82CFA4','#1A6638'],
+  'Gene':    ['#F4EBF9','#C39BDC','#6C2A8A'],
+  'Jodi':    ['#FEF5E7','#F7C987','#8A5A0A'],
+  'Kristy':  ['#FEF0F0','#F1A8A8','#8C2222'],
+  'MaryBeth':['#F0F3FE','#A4B8F5','#1E3799'],
+  'Mike':    ['#F0FAF8','#7ECDC1','#0E6B5E'],
+  'Monica':  ['#FDF0F7','#E8A6D2','#7B1F5E'],
+  'TC':      ['#F5F0EC','#C4A882','#5C3D1A'],
+  'Tim':     ['#EDFCF2','#6FCBA0','#145A38'],
+  'Carol':   ['#F0F8EC','#B5D8A8','#2A5E1A'],
+  'New RO':  ['#F4F4F4','#BBBBBB','#444444'],
+  'TBD':     ['#F4F4F4','#BBBBBB','#444444'],
+};
+
+// Pool of distinct soft colors to auto-assign to newly added ROs
+const COLOR_POOL = [
+  ['#FDF0FB','#DDA0D8','#6B1A6B'],
+  ['#FFF0E6','#F4A96A','#7A3A0A'],
+  ['#E6F0FF','#7AABF0','#1A3A7A'],
+  ['#F5FCE6','#A8D96A','#3A5E0A'],
+  ['#FFF5E6','#F0C96A','#7A5A0A'],
+  ['#F0FAFE','#6AC9E8','#0A4E6A'],
+  ['#FAF0F5','#E88AB0','#6A1A3A'],
+  ['#F0F5FF','#8AB0E8','#1A2E6A'],
+  ['#F5F0FA','#B08AE8','#3A1A6A'],
+  ['#FAFFF0','#A8E88A','#2A5E1A'],
+  ['#FFF0F0','#E8A8A8','#6A1A1A'],
+  ['#F0FFFA','#6AE8C8','#0A5E3A'],
+];
+let colorPoolIdx = 0;
+
+function nextColor(){
+  const c = COLOR_POOL[colorPoolIdx % COLOR_POOL.length];
+  colorPoolIdx++;
+  return c;
+}
+const DEPT_ROS = ['Finance','Finance Dept','Finance, Tech, Mar/Com','HR & Finance','HR Dept','IR Dept','Mar/Com Dept','Meetings Dept','Tech Dept'];
+function getAllROS(){ return [...MAIN_ROS,...DEPT_ROS]; }
+const TIERS_LIST = ['Signature','Essentials','Engagement /Project'];
+
+let viewMode = 'current';
+let dragSrcIdx = null;
+
+function refreshROFilter(){
+  const sel = document.getElementById('qRO');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All ROs</option>';
+  MAIN_ROS.forEach(r=>{
+    const o=document.createElement('option');
+    o.value=r; o.textContent=r;
+    if(r===cur) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function refreshLegend(){
+  const el = document.getElementById('ro-legend-items');
+  el.innerHTML = MAIN_ROS.map(r=>{
+    const [hBg, hBorder, hText] = RO_COLORS[r]||['#F4F4F4','#BBBBBB','#444444'];
+    const isIncoming = PROPOSED_ONLY_ROS.has(r);
+    return `<span class="leg-item" style="cursor:pointer" title="Edit RO: ${r}" onclick="openEditRO('${r}')">
+      <span class="leg-dot" style="background:${hBorder};border-radius:3px"></span>
+      ${r}${isIncoming?` <em style="font-size:10px;opacity:.7">(incoming)</em>`:''}
+    </span>`;
+  }).join('');
+}
+
+// ROs that have no current clients — only proposed assignments.
+// These cards are hidden in Current view and only shown in Proposed/Compare.
+const PROPOSED_ONLY_ROS = new Set(['Tim','Carol']);
+
+// populate on load
+refreshROFilter();
+refreshLegend();
+
+document.getElementById('datestamp').textContent =
+  'Client Services · Association Management · Updated ' +
+  new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+// ── view toggle ───────────────────────────────────────────────────────────────
+function setView(v,btn){
+  viewMode=v;
+  document.querySelectorAll('#vtoggle button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function activeRO(c){
+  if(viewMode==='proposed') return (c.prop&&c.prop!=='')?c.prop:c.curr;
+  // In current/compare view, skip clients whose current RO is a proposed-only RO
+  if(viewMode==='current'||viewMode==='both'){
+    if(PROPOSED_ONLY_ROS.has(c.curr)) return null; // hide from current view
+  }
+  return c.curr;
+}
+
+// ── build filtered map ────────────────────────────────────────────────────────
+function buildMap(){
+  const q   = document.getElementById('qClient').value.toLowerCase().trim();
+  const qro = document.getElementById('qRO').value;
+  const qt  = document.getElementById('qTier').value;
+  const map = {};
+  clients.forEach((c,i)=>{
+    if(q && !c.client.toLowerCase().includes(q) &&
+       !c.curr.toLowerCase().includes(q) &&
+       !(c.prop||'').toLowerCase().includes(q) &&
+       !(c.notes||'').toLowerCase().includes(q)) return;
+    if(qt && c.tier!==qt) return;
+    const ro = activeRO(c);
+    if(!ro) return;
+    if(qro && c.curr!==qro && ro!==qro) return;
+    if(!map[ro]) map[ro]=[];
+    map[ro].push({c,i});
+  });
+  return map;
+}
+
+// ── metrics ───────────────────────────────────────────────────────────────────
+function renderMetrics(){
+  const leaving  = clients.filter(c=>c.status==='leaving').length;
+  const atRisk   = clients.filter(c=>c.status==='at-risk').length;
+  const reassign = clients.filter(c=>c.prop&&c.prop!==c.curr&&c.prop!==''&&c.prop!=='New'&&c.prop!=='TBD'&&c.prop!=='New RO').length;
+  const pending  = clients.filter(c=>c.prop==='New'||c.prop==='TBD'||c.prop==='New RO').length;
+  const map = buildMap();
+  const roActive = MAIN_ROS.filter(r=>map[r]&&map[r].length).length;
+  document.getElementById('metrics').innerHTML=
+    `<div class="metric"><span class="n">${clients.length}</span><span class="l">Total clients</span></div>
+     <div class="metric"><span class="n">${roActive}</span><span class="l">Active ROs</span></div>
+     <div class="metric c-grn"><span class="n">${reassign}</span><span class="l">Planned<br>reassignments</span></div>
+     <div class="metric c-amb"><span class="n">${pending}</span><span class="l">Awaiting<br>assignment</span></div>
+     <div class="metric c-red"><span class="n">${leaving+atRisk}</span><span class="l">Leaving /<br>at risk</span></div>`;
+}
+
+// ── client row HTML ───────────────────────────────────────────────────────────
+function clientHTML(c,i){
+  const tc = c.tier==='Signature'?'sig':c.tier==='Essentials'?'ess':'eng';
+  const tl = c.tier==='Signature'?'SIG':c.tier==='Essentials'?'ESS':'ENG';
+  let sb='';
+  if(c.status==='leaving')  sb=`<span class="spill leaving">Leaving</span>`;
+  else if(c.status==='at-risk') sb=`<span class="spill at-risk">At risk</span>`;
+  else if(viewMode!=='current'){
+    if(c.prop==='New')      sb=`<span class="spill new-ro">New RO</span>`;
+    else if(c.prop==='TBD') sb=`<span class="spill tbd">TBD</span>`;
+    else if(c.prop==='New RO') sb=`<span class="spill new-hire">New hire</span>`;
+  }
+  let ct='';
+  if(viewMode==='both'&&c.prop&&c.prop!==c.curr&&c.prop!==''){
+    const dest=c.prop==='New'?'New RO':c.prop==='New RO'?'New hire':c.prop;
+    ct=`<span class="ctag">→&nbsp;<b>${dest}</b></span>`;
+  }
+  const nd=c.notes?`<span class="ndot" title="${c.notes.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"></span>`:'';
+  return `<div class="crow" draggable="true" data-idx="${i}"
+    ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)"
+    onclick="openEdit(${i})">
+    <span class="cname">${c.client}</span>
+    <span class="cmeta">${ct}${sb}<span class="tpill ${tc}">${tl}</span>${nd}
+      <button class="bedit" onclick="event.stopPropagation();openEdit(${i})" title="Edit">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    </span>
+  </div>`;
+}
+
+// ── render ────────────────────────────────────────────────────────────────────
+function render(){
+  renderMetrics();
+  const map=buildMap();
+  // In current view, hide proposed-only ROs entirely. In proposed/compare, always show them.
+  const qro = document.getElementById('qRO').value;
+  const visibleMain = MAIN_ROS.filter(ro => {
+    if(PROPOSED_ONLY_ROS.has(ro) && viewMode==='current') return false;
+    if(qro && ro !== qro && !map[ro]) return false;
+    if(qro && ro !== qro) return false;
+    return true;
+  });
+  const activeDept=DEPT_ROS.filter(r=>map[r]);
+  let html='';
+
+  if(visibleMain.length){
+    html+=`<div class="sec-lbl">Relationship Officers</div><div class="ro-grid">`;
+    visibleMain.forEach(ro=>{
+      const items=map[ro]||[];
+      const currCt=clients.filter(c=>c.curr===ro).length;
+      const propCt=clients.filter(c=>((c.prop&&c.prop!=='')?c.prop:c.curr)===ro).length;
+      const changed=currCt!==propCt;
+      const safeId=ro.replace(/[^a-z0-9]/gi,'_');
+      const [hBg, hBorder, hText] = RO_COLORS[ro] || ['#F0EFE9','#CCCCCC','#333333'];
+      const isIncoming = PROPOSED_ONLY_ROS.has(ro);
+      const incomingBadge = isIncoming ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,.12);color:${hText};letter-spacing:.04em;text-transform:uppercase">Incoming</span>` : '';
+      const subText = isIncoming
+        ? `${items.length} client${items.length!==1?'s':''} proposed`
+        : `${items.length} client${items.length!==1?'s':''} ${viewMode==='current'?'currently':viewMode==='proposed'?'proposed':'shown'}`;
+      const emptyMsg = isIncoming
+        ? 'No proposed clients yet — drag a client here'
+        : 'Drop a client here';
+      html+=`<div class="ro-card" id="roc-${safeId}"
+        style="border-left-color:${hBorder}"
+        ondragover="cardDragOver(event,this)" ondragleave="cardDragLeave(this)"
+        ondrop="cardDrop(event,'${ro}',this)">
+        <div class="ro-head" style="background:${hBg};color:${hText}">
+          <div>
+            <div class="ro-name" style="color:${hText};display:flex;align-items:center;gap:7px">${ro}${incomingBadge}</div>
+            <div class="ro-sub" style="color:${hText}">${subText}</div>
+          </div>
+          <div class="ro-badges">
+            <span class="badge curr" style="background:rgba(0,0,0,.1);color:${hText}">${isIncoming?0:currCt} now</span>
+            ${(isIncoming||changed)?`<span class="badge prop">${propCt} →</span>`:''}
+          </div>
+        </div>
+        <div class="ro-body" id="rob-${safeId}">
+          ${items.length?items.map(({c,i})=>clientHTML(c,i)).join(''):`<p class="empty-msg">${emptyMsg}</p>`}
+          <button class="ro-add" style="border-color:${hBorder};color:${hText}" onmouseover="this.style.background='${hBg}'" onmouseout="this.style.background=''" onclick="openAdd('${ro}')">+ Add client to ${ro}</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  if(activeDept.length){
+    html+=`<div class="sec-lbl">Department / Shared Service Clients</div><div class="dept-grid">`;
+    activeDept.forEach(ro=>{
+      const items=map[ro]||[];
+      html+=`<div class="dept-card">
+        <div class="dept-head">${ro}<span class="dn">${items.length}</span></div>
+        <div class="dept-body">${items.map(({c,i})=>clientHTML(c,i)).join('')}</div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  if(!visibleMain.length&&!activeDept.length){
+    html=`<div class="no-results"><div class="ico">◎</div><p>No clients match your current filters.</p></div>`;
+  }
+  document.getElementById('main').innerHTML=html;
+}
+
+// ── drag & drop ───────────────────────────────────────────────────────────────
+function dragStart(e,idx){
+  dragSrcIdx=idx;
+  setTimeout(()=>{const el=document.querySelector(`.crow[data-idx="${idx}"]`);if(el)el.classList.add('dragging');},0);
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',String(idx));
+}
+function dragEnd(e){
+  document.querySelectorAll('.crow').forEach(c=>c.classList.remove('dragging'));
+  document.querySelectorAll('.ro-card').forEach(c=>c.classList.remove('drag-over'));
+}
+function cardDragOver(e,el){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  el.classList.add('drag-over');
+}
+function cardDragLeave(el){ el.classList.remove('drag-over'); }
+function cardDrop(e,targetRO,el){
+  e.preventDefault();
+  el.classList.remove('drag-over');
+  if(dragSrcIdx===null) return;
+  const c=clients[dragSrcIdx];
+  if(!c) return;
+  if(viewMode==='proposed'){
+    c.prop=targetRO;
+  } else {
+    // update current; if proposed was same as current, keep in sync
+    if(!c.prop||c.prop===c.curr) c.prop=targetRO;
+    c.curr=targetRO;
+  }
+  dragSrcIdx=null;
+  render();
+}
+
+// ── modal helpers ─────────────────────────────────────────────────────────────
+function roOpts(sel=''){return getAllROS().map(r=>`<option value="${r}"${r===sel?' selected':''}>${r}</option>`).join('');}
+function propOpts(sel=''){
+  return ['(same as current)','New','TBD','New RO',...getAllROS()]
+    .map(r=>`<option value="${r}"${r===sel?' selected':''}>${r}</option>`).join('');
+}
+function tierOpts(sel=''){return TIERS_LIST.map(t=>`<option value="${t}"${t===sel?' selected':''}>${t}</option>`).join('');}
+function statusOpts(sel=''){
+  return [
+    ['','Active — no issues'],
+    ['at-risk','At risk (monitoring)'],
+    ['leaving','Leaving / contract ending'],
+  ].map(([v,l])=>`<option value="${v}"${v===sel?' selected':''}>${l}</option>`).join('');
+}
+
+let editIdx=null;
+
+function statusPreviewStyle(val){
+  if(val==='leaving') return 'background:var(--red-lt);color:var(--red)';
+  if(val==='at-risk') return 'background:var(--amber-lt);color:var(--amber)';
+  return 'background:var(--green-lt);color:var(--green)';
+}
+function statusPreviewText(val){
+  if(val==='leaving') return '⚠ This client is leaving or contract is ending.';
+  if(val==='at-risk') return '⚠ This client is at risk — monitor closely.';
+  return '✓ Client is active.';
+}
+
+function openAdd(preRO=''){
+  editIdx=null;
+  document.getElementById('mtitle').textContent='Add New Client';
+  document.getElementById('mbody').innerHTML=`
+    <div class="mfield-row">
+      <div class="mfield"><label>Client name / acronym</label><input id="fc" placeholder="e.g. ACME" /></div>
+      <div class="mfield"><label>Service tier</label><select id="ft">${tierOpts()}</select></div>
+    </div>
+    <div class="mfield-row">
+      <div class="mfield"><label>Current RO</label><select id="fcurr">${roOpts(preRO)}</select></div>
+      <div class="mfield"><label>Proposed RO</label><select id="fprop">${propOpts('(same as current)')}</select></div>
+    </div>
+    <div class="mfield"><label>Client status</label>
+      <select id="fstat" onchange="updateStatusPreview(this.value)">${statusOpts('')}</select>
+      <div class="status-preview show" id="statprev" style="${statusPreviewStyle('')}">${statusPreviewText('')}</div>
+    </div>
+    <div class="mfield"><label>Notes / transition details</label><textarea id="fn" placeholder="Any context, timing, or transition notes…"></textarea></div>`;
+  document.getElementById('mfoot').innerHTML=
+    `<button class="mbtn" onclick="closeModal()">Cancel</button>
+     <button class="mbtn primary" onclick="saveClient()">Add Client</button>`;
+  document.getElementById('moverlay').classList.add('open');
+}
+
+function openEdit(idx){
+  editIdx=idx;
+  const c=clients[idx];
+  const propVal=(!c.prop||c.prop===c.curr)?'(same as current)':c.prop;
+  document.getElementById('mtitle').textContent=`Edit — ${c.client}`;
+  document.getElementById('mbody').innerHTML=`
+    <div class="mfield-row">
+      <div class="mfield"><label>Client name / acronym</label><input id="fc" value="${c.client}" /></div>
+      <div class="mfield"><label>Service tier</label><select id="ft">${tierOpts(c.tier)}</select></div>
+    </div>
+    <div class="mfield-row">
+      <div class="mfield"><label>Current RO</label><select id="fcurr">${roOpts(c.curr)}</select></div>
+      <div class="mfield"><label>Proposed RO</label><select id="fprop">${propOpts(propVal)}</select></div>
+    </div>
+    <div class="mfield"><label>Client status</label>
+      <select id="fstat" onchange="updateStatusPreview(this.value)">${statusOpts(c.status||'')}</select>
+      <div class="status-preview show" id="statprev" style="${statusPreviewStyle(c.status||'')}">${statusPreviewText(c.status||'')}</div>
+    </div>
+    <div class="mfield"><label>Notes / transition details</label><textarea id="fn">${(c.notes||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea></div>`;
+  document.getElementById('mfoot').innerHTML=
+    `<button class="mbtn danger" onclick="deleteClient(${idx})">Remove client</button>
+     <button class="mbtn" onclick="closeModal()">Cancel</button>
+     <button class="mbtn primary" onclick="saveClient()">Save changes</button>`;
+  document.getElementById('moverlay').classList.add('open');
+}
+
+function updateStatusPreview(val){
+  const el=document.getElementById('statprev');
+  if(el){el.style.cssText=statusPreviewStyle(val);el.textContent=statusPreviewText(val);el.classList.add('show');}
+}
+
+function saveClient(){
+  const name=document.getElementById('fc').value.trim();
+  if(!name){alert('Please enter a client name.');return;}
+  const tier  =document.getElementById('ft').value;
+  const curr  =document.getElementById('fcurr').value;
+  let prop    =document.getElementById('fprop').value;
+  if(prop==='(same as current)') prop=curr;
+  const status=document.getElementById('fstat').value;
+  const notes =document.getElementById('fn').value.trim();
+  if(editIdx!==null){
+    clients[editIdx]={client:name,tier,curr,prop,notes,status};
+  } else {
+    clients.push({client:name,tier,curr,prop,notes,status});
+  }
+  closeModal();render();
+}
+
+function deleteClient(idx){
+  if(!confirm(`Remove "${clients[idx].client}" from the dashboard?`)) return;
+  clients.splice(idx,1);
+  closeModal();render();
+}
+
+// ── RO management ─────────────────────────────────────────────────────────────
+function roTypeOpts(sel='proposed-only'){
+  return [
+    ['current','Has current clients (appears in all views)'],
+    ['proposed-only','Incoming / proposed only (hidden in Current view)'],
+  ].map(([v,l])=>`<option value="${v}"${v===sel?' selected':''}>${l}</option>`).join('');
+}
+
+function openAddRO(){
+  document.getElementById('mtitle').textContent='Add New RO';
+  document.getElementById('mbody').innerHTML=`
+    <div class="mfield"><label>RO name</label><input id="ro_name" placeholder="e.g. Sarah" /></div>
+    <div class="mfield"><label>RO type</label>
+      <select id="ro_type">${roTypeOpts('proposed-only')}</select>
+    </div>
+    <div class="mfield" style="padding:10px;border-radius:6px;background:var(--navy-lt);font-size:12px;color:var(--navy)">
+      A color will be automatically assigned. You can reassign clients to this RO immediately after adding.
+    </div>`;
+  document.getElementById('mfoot').innerHTML=
+    `<button class="mbtn" onclick="closeModal()">Cancel</button>
+     <button class="mbtn primary" onclick="saveRO()">Add RO</button>`;
+  document.getElementById('moverlay').classList.add('open');
+}
+
+function openEditRO(name){
+  document.getElementById('mtitle').textContent=`Edit RO — ${name}`;
+  const isProposed = PROPOSED_ONLY_ROS.has(name);
+  document.getElementById('mbody').innerHTML=`
+    <div class="mfield"><label>RO name</label><input id="ro_name" value="${name}" /></div>
+    <div class="mfield"><label>RO type</label>
+      <select id="ro_type">${roTypeOpts(isProposed?'proposed-only':'current')}</select>
+    </div>`;
+  document.getElementById('mfoot').innerHTML=
+    `<button class="mbtn danger" onclick="removeRO('${name}')">Remove RO</button>
+     <button class="mbtn" onclick="closeModal()">Cancel</button>
+     <button class="mbtn primary" onclick="saveRO('${name}')">Save changes</button>`;
+  document.getElementById('moverlay').classList.add('open');
+}
+
+function saveRO(existingName=''){
+  const name = document.getElementById('ro_name').value.trim();
+  if(!name){ alert('Please enter an RO name.'); return; }
+  const type = document.getElementById('ro_type').value;
+  const isProposed = type==='proposed-only';
+
+  if(existingName && existingName!==name){
+    // rename: update all client records
+    clients.forEach(c=>{
+      if(c.curr===existingName) c.curr=name;
+      if(c.prop===existingName) c.prop=name;
+    });
+    // update MAIN_ROS
+    const idx = MAIN_ROS.indexOf(existingName);
+    if(idx>-1) MAIN_ROS[idx]=name;
+    // move color
+    if(RO_COLORS[existingName]){ RO_COLORS[name]=RO_COLORS[existingName]; delete RO_COLORS[existingName]; }
+    // update proposed-only set
+    if(PROPOSED_ONLY_ROS.has(existingName)){ PROPOSED_ONLY_ROS.delete(existingName); if(isProposed) PROPOSED_ONLY_ROS.add(name); }
+    else { if(isProposed) PROPOSED_ONLY_ROS.add(name); else PROPOSED_ONLY_ROS.delete(name); }
+  } else if(!existingName) {
+    // new RO
+    if(MAIN_ROS.includes(name)){ alert(`An RO named "${name}" already exists.`); return; }
+    MAIN_ROS.push(name);
+    if(!RO_COLORS[name]) RO_COLORS[name]=nextColor();
+    if(isProposed) PROPOSED_ONLY_ROS.add(name);
+    else PROPOSED_ONLY_ROS.delete(name);
+  } else {
+    // same name, just update type
+    if(isProposed) PROPOSED_ONLY_ROS.add(name);
+    else PROPOSED_ONLY_ROS.delete(name);
+  }
+
+  refreshROFilter();
+  refreshLegend();
+  closeModal();
+  render();
+}
+
+function removeRO(name){
+  const clientCount = clients.filter(c=>c.curr===name||c.prop===name).length;
+  const msg = clientCount>0
+    ? `"${name}" has ${clientCount} client assignment(s). Removing this RO will not delete those clients, but their RO will be cleared. Continue?`
+    : `Remove RO "${name}"?`;
+  if(!confirm(msg)) return;
+  // clear assignments
+  clients.forEach(c=>{
+    if(c.curr===name) c.curr='';
+    if(c.prop===name) c.prop='';
+  });
+  const idx=MAIN_ROS.indexOf(name);
+  if(idx>-1) MAIN_ROS.splice(idx,1);
+  delete RO_COLORS[name];
+  PROPOSED_ONLY_ROS.delete(name);
+  refreshROFilter();
+  refreshLegend();
+  closeModal();
+  render();
+}
+
+function closeModal(){document.getElementById('moverlay').classList.remove('open');}
+function overlayClick(e){if(e.target===document.getElementById('moverlay'))closeModal();}
+
+render();
+</script>
+</body>
+</html>
